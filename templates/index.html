@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            background-color: #0f172a;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .calculator {
+            background: linear-gradient(145deg, #1e293b, #334155);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 600px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        .calculator-display {
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+        .calculator-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            opacity: 0.5;
+        }
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: none;
+            background: white;
+            color: #1e293b;
+            font-size: 16px;
+            outline: none;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 8px;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .btn {
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-genre {
+            background: linear-gradient(145deg, #334155, #475569);
+        }
+        .btn-operator {
+            background: linear-gradient(145deg, #f97316, #ea580c);
+        }
+        .btn-input {
+            background: linear-gradient(145deg, #22c55e, #16a34a);
+        }
+        .generate-btn {
+            background: linear-gradient(145deg, #3b82f6, #2563eb);
+            padding: 16px 32px;
+            border-radius: 16px;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 24px auto 0;
+        }
+        .generate-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+    <script>
+        let inputCount = 0;
+        let equation = [];
+        let categorizedInputs = [];
+
+        function promptInput(type) {
+            if (inputCount < 4) {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+
+                const input = document.createElement('input');
+                input.type = type === 'link' ? 'url' : 'text';
+                input.className = 'input-field';
+                input.placeholder = type === 'link' ? 'Enter YouTube Link' : 'Enter Username';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = function() {
+                    inputGroup.remove();
+                    inputCount--;
+                };
+
+                input.onchange = function() {
+                    if (this.value) {
+                        categorizedInputs.push({
+                            value: this.value,
+                            category: type
+                        });
+                    }
+                };
+
+                inputGroup.appendChild(input);
+                inputGroup.appendChild(removeBtn);
+                document.querySelector('.calculator-display').appendChild(inputGroup);
+                input.focus();
+                inputCount++;
+            }
+        }
+
+        function addGenre(genre) {
+            if (inputCount < 4) {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'input-field';
+                input.value = genre;
+                input.readOnly = true;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = function() {
+                    inputGroup.remove();
+                    inputCount--;
+                };
+
+                inputGroup.appendChild(input);
+                inputGroup.appendChild(removeBtn);
+                document.querySelector('.calculator-display').appendChild(inputGroup);
+                inputCount++;
+
+                categorizedInputs.push({
+                    value: genre,
+                    category: 'genre'
+                });
+            }
+        }
+
+        function addOperator(op) {
+            equation.push(op);
+        }
+
+        function calculate() {
+            const form = document.getElementById('calculator-form');
+            const equationInput = document.createElement('input');
+    
+            equationInput.type = 'hidden';
+            equationInput.name = 'equation';
+            equationInput.value = equation.join(' ');
+            form.appendChild(equationInput);
+
+            const categorizedInputsField = document.createElement('input');
+            categorizedInputsField.type = 'hidden';
+            categorizedInputsField.name = 'categorized_inputs';
+            categorizedInputsField.value = JSON.stringify(categorizedInputs);
+            form.appendChild(categorizedInputsField);
+
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+    <div class="calculator">
+        <div class="calculator-display">
+        </div>
+        
+        <form id="calculator-form" method="POST">
+            <input type="text" id="text_input" name="text_input" style="width: 100%; padding-bottom: 20px; margin-bottom: 20px" placeholder="I am a 20 year old fisherman creator...">
+
+
+            <!-- First row -->
+            <div class="calculator-grid">
+                <button type="button" class="btn btn-genre" onclick="addGenre('Beauty')">Beauty</button>
+                <button type="button" class="btn btn-genre" onclick="addGenre('Comedy')">Comedy</button>
+                <button type="button" class="btn btn-genre" onclick="addGenre('Fashion')">Fashion</button>
+                <button type="button" class="btn btn-genre" onclick="addGenre('Fitness')">Fitness</button>
+            </div>
+
+            <!-- Second row -->
+            <div class="calculator-grid">
+                <button type="button" class="btn btn-genre" onclick="addGenre('Food')">Food</button>
+                <button type="button" class="btn btn-genre" onclick="addGenre('Travel')">Travel</button>
+                <button type="button" class="btn btn-operator" onclick="addOperator('*')">*</button>
+                <button type="button" class="btn btn-operator" onclick="addOperator('/')">/</button>
+            </div>
+
+            <!-- Third row -->
+            <div class="calculator-grid">
+                <button type="button" class="btn btn-input" onclick="promptInput('username')">Username</button>
+                <button type="button" class="btn btn-input" onclick="promptInput('link')">Link</button>
+                <button type="button" class="btn btn-operator" onclick="addOperator('+')">+</button>
+                <button type="button" class="btn btn-operator" onclick="addOperator('-')">-</button>
+            </div>
+
+            <!-- Generate button -->
+            <button type="button" class="generate-btn" onclick="calculate()">
+                Generate Ideas
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+</body>
+</html>
